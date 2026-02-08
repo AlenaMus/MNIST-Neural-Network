@@ -1,0 +1,87 @@
+# ============================================
+# MNIST Handwritten Digit Recognition
+# Project Dependencies
+# ============================================
+# Install all dependencies with:
+#   pip install -r requirements.txt
+# ============================================
+
+# Core Deep Learning Framework
+# Includes Keras API and GPU support (requires CUDA/cuDNN for GPU acceleration)
+tensorflow>=2.10.0
+
+# Numerical Computing
+# Essential for array operations and mathematical computations
+numpy>=1.21.0
+
+# Data Visualization
+# For plotting training curves, displaying images, and creating visualizations
+matplotlib>=3.4.0
+
+# Enhanced Visualization
+# For beautiful confusion matrix heatmaps
+seaborn>=0.11.0
+
+# Machine Learning Utilities
+# For confusion matrix calculation and metrics
+scikit-learn>=1.0.0
+
+# Image Processing
+# For loading and preprocessing custom handwritten digit images
+Pillow>=9.0.0
+
+# ============================================
+# GPU SETUP NOTES
+# ============================================
+# TensorFlow 2.10+ automatically detects and uses available GPUs
+#
+# GPU Requirements:
+# - NVIDIA GPU with CUDA support
+# - CUDA Toolkit 11.x or 12.x (compatible with TensorFlow version)
+# - cuDNN library (compatible with CUDA version)
+# - Minimum GPU Memory: 2 GB (recommended: 4+ GB)
+#
+# Verify GPU detection after installation:
+#   python -c "import tensorflow as tf; print(tf.config.list_physical_devices('GPU'))"
+#
+# If no GPU detected:
+# 1. Install NVIDIA GPU drivers: https://www.nvidia.com/Download/index.aspx
+# 2. Install CUDA Toolkit: https://developer.nvidia.com/cuda-toolkit
+# 3. Install cuDNN: https://developer.nvidia.com/cudnn
+# 4. Ensure versions are compatible with TensorFlow
+#
+# For CPU-only installation (no GPU acceleration):
+#   pip install tensorflow-cpu>=2.10.0
+# ============================================
+
+# ============================================
+# LIBRARY PURPOSES
+# ============================================
+# tensorflow:     Neural network framework (includes Keras)
+# numpy:          Numerical operations, array manipulation
+# matplotlib:     Plotting loss/accuracy curves, displaying images
+# seaborn:        Confusion matrix heatmap visualization
+# scikit-learn:   Confusion matrix calculation, metrics
+# Pillow (PIL):   Load and preprocess custom digit images
+# ============================================
+
+# ============================================
+# INSTALLATION COMMANDS
+# ============================================
+# Standard installation (with GPU support):
+#   pip install -r requirements.txt
+#
+# CPU-only installation (no GPU):
+#   Replace tensorflow>=2.10.0 with tensorflow-cpu>=2.10.0
+#   Then: pip install -r requirements.txt
+#
+# Google Colab (already includes most packages):
+#   pip install seaborn scikit-learn
+# ============================================
+
+# ============================================
+# COMPATIBILITY
+# ============================================
+# Python Version: 3.8 or higher (recommended: 3.10+)
+# Operating Systems: Windows, macOS, Linux
+# ============================================

@@ -1,0 +1,216 @@
+{
+  "project": "MNIST Handwritten Digit Recognition Neural Network",
+  "version": "1.0",
+  "created": "2026-02-08",
+  "total_tasks": 15,
+  "tasks": [
+    {
+      "id": 1,
+      "subject": "Setup project structure and install dependencies",
+      "description": "Create the project structure and requirements.txt file with all dependencies:\n- tensorflow>=2.10.0\n- numpy>=1.21.0\n- matplotlib>=3.4.0\n- seaborn>=0.11.0\n- scikit-learn>=1.0.0\n- Pillow>=9.0.0\n\nCreate the main Python file: mnist_digit_recognition.py\nCreate test_images/ folder for custom digit images\nCreate results/ folder for output files",
+      "phase": "Setup",
+      "status": "pending",
+      "blocked_by": [],
+      "blocks": [2],
+      "estimated_time": "15 min",
+      "priority": "high"
+    },
+    {
+      "id": 2,
+      "subject": "Implement GPU configuration and verification",
+      "description": "Add Section 1: Import libraries and GPU configuration\n- Import all required libraries (tensorflow, keras, numpy, matplotlib, seaborn, sklearn, PIL)\n- Check GPU availability using tf.config.list_physical_devices('GPU')\n- Print GPU device name if available\n- Configure GPU memory growth to prevent OOM errors\n- Add fallback message if GPU not available\n- Add comprehensive comments explaining GPU benefits",
+      "phase": "Setup",
+      "status": "pending",
+      "blocked_by": [1],
+      "blocks": [3],
+      "estimated_time": "20 min",
+      "priority": "high"
+    },
+    {
+      "id": 3,
+      "subject": "Implement MNIST data loading and exploration",
+      "description": "Add Section 2: Load and explore MNIST dataset\n- Load dataset using tensorflow.keras.datasets.mnist.load_data()\n- Store in (X_train, y_train), (X_test, y_test)\n- Print dataset information:\n  - Training set shape: (60000, 28, 28)\n  - Test set shape: (10000, 28, 28)\n  - Pixel value range: 0-255\n  - Label range: 0-9\n- Add comments explaining MNIST dataset structure",
+      "phase": "Data",
+      "status": "pending",
+      "blocked_by": [2],
+      "blocks": [4, 5],
+      "estimated_time": "15 min",
+      "priority": "high"
+    },
+    {
+      "id": 4,
+      "subject": "Implement sample images preview (digits 6-9)",
+      "description": "Add Section 2.1: Preview sample images\n- Find one sample image for each digit 6, 7, 8, 9 from training set\n- Create 2x2 matplotlib subplot figure\n- Display each image with:\n  - Grayscale colormap (cmap='gray')\n  - Title showing the digit label\n  - Axis hidden for cleaner display\n- Save figure to results/sample_digits_preview.png\n- Add comments explaining visualization purpose",
+      "phase": "Data",
+      "status": "pending",
+      "blocked_by": [3],
+      "blocks": [],
+      "estimated_time": "20 min",
+      "priority": "medium"
+    },
+    {
+      "id": 5,
+      "subject": "Implement data preprocessing",
+      "description": "Add Section 3: Data preprocessing with three steps:\n\n3.1 Normalization:\n- Divide pixel values by 255.0 to scale from [0-255] to [0-1]\n- Add comment explaining WHY normalization improves training\n\n3.2 Flattening:\n- Reshape images from (N, 28, 28) to (N, 784)\n- Add comment explaining WHY dense layers need 1D input\n\n3.3 One-Hot Encoding:\n- Use keras.utils.to_categorical(labels, 10)\n- Convert labels like 3 to [0,0,0,1,0,0,0,0,0,0]\n- Add comment explaining WHY one-hot encoding is needed\n\nPrint shapes after each transformation to verify",
+      "phase": "Data",
+      "status": "pending",
+      "blocked_by": [3],
+      "blocks": [6],
+      "estimated_time": "25 min",
+      "priority": "high"
+    },
+    {
+      "id": 6,
+      "subject": "Build neural network architecture",
+      "description": "Add Section 4: Build the neural network model\n\nCreate Sequential model with:\n- Input: 784 neurons (flattened 28x28 image)\n- Hidden Layer 1: Dense(128, activation='relu')\n- Hidden Layer 2: Dense(64, activation='relu')\n- Output Layer: Dense(10, activation='softmax')\n\nAdd comprehensive comments explaining:\n- Why fully connected network\n- Why 784 input neurons\n- Why 128→64 funnel architecture\n- Why ReLU activation (avoid vanishing gradients)\n- Why Softmax for output (probability distribution)\n\nDisplay model.summary()",
+      "phase": "Model Building",
+      "status": "pending",
+      "blocked_by": [5],
+      "blocks": [7],
+      "estimated_time": "30 min",
+      "priority": "high"
+    },
+    {
+      "id": 7,
+      "subject": "Compile model with loss function and optimizer explanations",
+      "description": "Add Section 5: Compile the model\n\nCompile with:\n- optimizer='adam'\n- loss='categorical_crossentropy'\n- metrics=['accuracy']\n\nAdd COMPREHENSIVE comments explaining:\n\nLOSS FUNCTION (Categorical Crossentropy):\n- What a loss function measures\n- Formula: Loss = -Σ(y_true × log(y_pred))\n- Example calculation showing good vs bad prediction\n- Why this loss for multi-class classification\n\nOPTIMIZER (Adam):\n- What an optimizer does\n- Why Adam (adaptive learning rate + momentum)\n- Default hyperparameters (lr=0.001, beta_1=0.9, beta_2=0.999)\n- Advantages over SGD, RMSprop",
+      "phase": "Model Building",
+      "status": "pending",
+      "blocked_by": [6],
+      "blocks": [8],
+      "estimated_time": "30 min",
+      "priority": "high"
+    },
+    {
+      "id": 8,
+      "subject": "Implement model training",
+      "description": "Add Section 6: Train the model\n\nTrain with:\n- epochs=10\n- batch_size=32\n- validation_split=0.1 (or use test set for validation)\n- verbose=1 (show progress)\n\nStore training history: history = model.fit(...)\n\nAdd comments explaining:\n- What epochs means (full passes through data)\n- What batch_size means (samples per weight update)\n- What validation_split does (monitor overfitting)\n- How to interpret training output (loss, accuracy per epoch)",
+      "phase": "Training & Evaluation",
+      "status": "pending",
+      "blocked_by": [7],
+      "blocks": [9, 10],
+      "estimated_time": "20 min",
+      "priority": "high"
+    },
+    {
+      "id": 9,
+      "subject": "Implement model evaluation on test set",
+      "description": "Add Section 7: Evaluate the model\n\nEvaluate on test set:\n- test_loss, test_accuracy = model.evaluate(X_test, y_test)\n- Print results clearly:\n  \"Test Loss: 0.XXXX\"\n  \"Test Accuracy: XX.XX%\"\n\nAdd comments explaining:\n- Why evaluate on test set (unseen data)\n- Difference between training and test performance\n- What good accuracy looks like (>95% target)\n- Signs of overfitting (train acc >> test acc)",
+      "phase": "Training & Evaluation",
+      "status": "pending",
+      "blocked_by": [8],
+      "blocks": [11, 12],
+      "estimated_time": "15 min",
+      "priority": "high"
+    },
+    {
+      "id": 10,
+      "subject": "Implement training history visualization (loss and accuracy curves)",
+      "description": "Add Section 8: Visualize training history\n\n8.1 Loss Curve:\n- Plot history.history['loss'] (training loss)\n- Plot history.history['val_loss'] (validation loss)\n- X-axis: Epochs, Y-axis: Loss\n- Title: \"Model Loss Over Training Epochs\"\n- Legend: Training Loss, Validation Loss\n- Grid enabled\n- Save to results/training_loss_curve.png\n\n8.2 Accuracy Curve:\n- Plot history.history['accuracy'] (training accuracy)\n- Plot history.history['val_accuracy'] (validation accuracy)\n- X-axis: Epochs, Y-axis: Accuracy\n- Title: \"Model Accuracy Over Training Epochs\"\n- Save to results/training_accuracy_curve.png\n\nAdd comments explaining how to interpret:\n- Both lines decreasing = good learning\n- Training << Validation loss = overfitting\n- Lines converging = good generalization",
+      "phase": "Visualization",
+      "status": "pending",
+      "blocked_by": [8],
+      "blocks": [14],
+      "estimated_time": "25 min",
+      "priority": "medium"
+    },
+    {
+      "id": 11,
+      "subject": "Implement confusion matrix (10x10)",
+      "description": "Add Section 9: Confusion Matrix\n\nGenerate predictions:\n- y_pred = model.predict(X_test)\n- y_pred_classes = np.argmax(y_pred, axis=1)\n- y_true_classes = np.argmax(y_test, axis=1)\n\nCreate confusion matrix:\n- Use sklearn.metrics.confusion_matrix(y_true, y_pred)\n- Result: 10x10 matrix\n\nVisualize as heatmap:\n- Use seaborn.heatmap()\n- annot=True (show numbers in cells)\n- fmt='d' (integer format)\n- cmap='Blues' (color scheme)\n- xticklabels and yticklabels: 0-9\n- Title: \"Confusion Matrix - MNIST Test Set\"\n- Save to results/confusion_matrix.png\n\nAdd comments explaining:\n- Rows = actual labels, Columns = predicted labels\n- Diagonal = correct predictions\n- Off-diagonal = errors (which digits get confused)",
+      "phase": "Visualization",
+      "status": "pending",
+      "blocked_by": [9],
+      "blocks": [14],
+      "estimated_time": "25 min",
+      "priority": "medium"
+    },
+    {
+      "id": 12,
+      "subject": "Implement custom image prediction function",
+      "description": "Add Section 10: Custom Image Prediction\n\n10.1 Create preprocess_image(image_path) function:\n- Load image using PIL.Image.open()\n- Convert to grayscale: .convert('L')\n- Resize to 28x28: .resize((28, 28))\n- Convert to numpy array\n- Invert if needed (MNIST = white on black)\n- Normalize: divide by 255.0\n- Flatten to 784 elements\n- Reshape to (1, 784) for model input\n- Return preprocessed array\n\n10.2 Create predict_digit(model, image_path) function:\n- Call preprocess_image()\n- Get prediction: model.predict()\n- Get predicted class: np.argmax()\n- Get confidence: max probability\n- Return (digit, confidence, all_probabilities)\n\n10.3 Create display_prediction(image_path, digit, confidence) function:\n- Display original image\n- Show predicted digit and confidence\n- Optional: bar chart of all class probabilities\n\nAdd error handling for file not found, invalid format",
+      "phase": "Custom Prediction",
+      "status": "pending",
+      "blocked_by": [9],
+      "blocks": [13],
+      "estimated_time": "35 min",
+      "priority": "medium"
+    },
+    {
+      "id": 13,
+      "subject": "Implement interactive prediction loop",
+      "description": "Add Section 10.4: Interactive prediction mode\n\nCreate interactive loop:\n- Prompt user: \"Enter image path (or 'q' to quit):\"\n- If 'q' or 'quit': exit loop\n- Else: call predict_digit() and display results\n- Handle exceptions gracefully (file not found, etc.)\n- Continue prompting until user quits\n\nExample flow:\nEnter image path (or 'q' to quit): test_images/my_digit.png\nPredicted: 7 (Confidence: 98.5%)\nEnter image path (or 'q' to quit): q\nExiting prediction mode.",
+      "phase": "Custom Prediction",
+      "status": "pending",
+      "blocked_by": [12],
+      "blocks": [14],
+      "estimated_time": "15 min",
+      "priority": "medium"
+    },
+    {
+      "id": 14,
+      "subject": "Create main program flow and integrate all components",
+      "description": "Create main() function that orchestrates all sections:\n\n1. Print program header\n2. Check GPU configuration\n3. Load MNIST dataset\n4. Display sample images (6-9)\n5. Preprocess data\n6. Build neural network\n7. Compile model\n8. Train model\n9. Evaluate on test set\n10. Plot training history (loss and accuracy curves)\n11. Generate and display confusion matrix\n12. Enter interactive prediction mode\n\nAdd if __name__ == \"__main__\": main()\n\nEnsure all sections have clear separators and print statements\nTest complete program flow from start to finish",
+      "phase": "Integration & Testing",
+      "status": "pending",
+      "blocked_by": [10, 11, 13],
+      "blocks": [15],
+      "estimated_time": "30 min",
+      "priority": "high"
+    },
+    {
+      "id": 15,
+      "subject": "Test program and verify all acceptance criteria",
+      "description": "Run complete program and verify:\n\nFunctional:\n- [ ] GPU detected and used\n- [ ] Dataset loads correctly (60K train, 10K test)\n- [ ] Sample images 6-9 display correctly\n- [ ] Preprocessing works (shapes verified)\n- [ ] Model builds with correct architecture\n- [ ] Model trains for 10 epochs\n- [ ] Test accuracy >= 95%\n- [ ] Loss curve displays correctly\n- [ ] Accuracy curve displays correctly\n- [ ] Confusion matrix 10x10 displays correctly\n- [ ] Custom image prediction works\n\nDocumentation:\n- [ ] All sections have header comments\n- [ ] Loss function explanation included\n- [ ] Optimizer explanation included\n- [ ] Architecture choices explained\n- [ ] All steps have educational comments\n\nPerformance:\n- [ ] Training completes in < 1 minute on GPU\n- [ ] No errors or warnings",
+      "phase": "Integration & Testing",
+      "status": "pending",
+      "blocked_by": [14],
+      "blocks": [],
+      "estimated_time": "30 min",
+      "priority": "high"
+    }
+  ],
+  "phases": [
+    {
+      "name": "Setup",
+      "tasks": [1, 2],
+      "description": "Project initialization and environment configuration"
+    },
+    {
+      "name": "Data",
+      "tasks": [3, 4, 5],
+      "description": "Data loading, visualization, and preprocessing"
+    },
+    {
+      "name": "Model Building",
+      "tasks": [6, 7],
+      "description": "Neural network architecture and compilation"
+    },
+    {
+      "name": "Training & Evaluation",
+      "tasks": [8, 9],
+      "description": "Model training and test set evaluation"
+    },
+    {
+      "name": "Visualization",
+      "tasks": [10, 11],
+      "description": "Training curves and confusion matrix"
+    },
+    {
+      "name": "Custom Prediction",
+      "tasks": [12, 13],
+      "description": "Custom image prediction functionality"
+    },
+    {
+      "name": "Integration & Testing",
+      "tasks": [14, 15],
+      "description": "Final integration and acceptance testing"
+    }
+  ],
+  "summary": {
+    "total_estimated_time": "5 hours 45 min",
+    "high_priority_tasks": 10,
+    "medium_priority_tasks": 5,
+    "critical_path": [1, 2, 3, 5, 6, 7, 8, 9, 11, 14, 15]
+  }
+}
