@@ -39,6 +39,10 @@ from sklearn.metrics import confusion_matrix  # For evaluating prediction errors
 # Image Processing (for custom predictions)
 from PIL import Image                    # For loading and preprocessing custom images
 
+# GUI for Drawing and File Upload
+import tkinter as tk
+from tkinter import filedialog
+
 # System Utilities
 import os
 import warnings
@@ -1154,74 +1158,367 @@ print()
 
 
 # ============================================
-# CELL 13: Interactive Prediction Loop
+# CELL 13: Interactive GUI - Draw or Upload Images
 # ============================================
-# Interactive mode for testing multiple custom images.
+# A Tkinter GUI window with two ways to test the model:
+#   1. DRAW a digit with your mouse on a canvas
+#   2. UPLOAD an image file using a file browser dialog
+#
+# The GUI shows the prediction results with a probability chart.
 # ============================================
 
-def interactive_prediction_mode():
+def predict_from_array(img_array_2d):
     """
-    Interactive loop for predicting multiple custom images.
-    User can keep testing images until they quit.
+    Predict digit from a 28x28 numpy array and display results.
+
+    Args:
+        img_array_2d: numpy array of shape (28, 28)
+
+    Returns:
+        tuple: (predicted_digit, confidence)
     """
-    print("INTERACTIVE PREDICTION MODE")
+    # Normalize and flatten
+    img_flat = img_array_2d.astype('float32')
+    if img_flat.max() > 1:
+        img_flat = img_flat / 255.0
+    img_flat = img_flat.reshape(1, 784)
+
+    # Predict
+    predictions = model.predict(img_flat, verbose=0)
+    predicted_digit = np.argmax(predictions[0])
+    confidence = predictions[0][predicted_digit] * 100
+
+    # Display results
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
+
+    ax1.imshow(img_array_2d, cmap='gray')
+    ax1.set_title('Image (as model sees it)', fontsize=14, fontweight='bold')
+    ax1.axis('off')
+
+    ax2.bar(range(10), predictions[0] * 100, color='steelblue', alpha=0.7)
+    ax2.bar(predicted_digit, predictions[0][predicted_digit] * 100, color='crimson', alpha=0.9)
+    ax2.set_xlabel('Digit', fontsize=12, fontweight='bold')
+    ax2.set_ylabel('Probability (%)', fontsize=12, fontweight='bold')
+    ax2.set_title(f'Prediction: {predicted_digit} ({confidence:.1f}%)',
+                  fontsize=14, fontweight='bold')
+    ax2.set_xticks(range(10))
+    ax2.grid(True, alpha=0.3, axis='y')
+
+    plt.tight_layout()
+    plt.show()
+
+    print(f"\nPredicted Digit: {predicted_digit}")
+    print(f"Confidence: {confidence:.2f}%")
+    print()
+    print("All class probabilities:")
+    for i, prob in enumerate(predictions[0]):
+        marker = " <-- PREDICTED" if i == predicted_digit else ""
+        print(f"  Digit {i}: {prob * 100:5.2f}%{marker}")
+    print()
+
+    return predicted_digit, confidence
+
+
+def open_drawing_gui():
+    """
+    Open a Tkinter GUI window with:
+    - A drawing canvas (black background, white pen) to draw digits
+    - A "Load Image" button to upload an image file via file browser
+    - A "Predict" button to run the model on the drawn/loaded image
+    - A "Clear" button to reset the canvas
+    """
+    print("INTERACTIVE GUI MODE")
     print("=" * 60)
-    print("Test your model on custom handwritten digit images!")
-    print()
-    print("Instructions:")
-    print("  1. Enter the path to your image file")
-    print("  2. View the prediction results")
-    print("  3. Enter 'q' or 'quit' to exit")
-    print()
-    print("Image requirements:")
-    print("  - Format: PNG, JPG, or JPEG")
-    print("  - Content: Single handwritten digit (0-9)")
-    print("  - Recommended: White digit on black background (MNIST format)")
+    print("A drawing window will open.")
+    print("  - Draw a digit with your mouse (white on black)")
+    print("  - Or click 'Load Image' to browse for an image file")
+    print("  - Click 'Predict' to see the model's prediction")
+    print("  - Click 'Clear' to erase and try again")
+    print("  - Close the window when done")
     print("=" * 60)
     print()
 
-    while True:
-        # Prompt for image path
-        image_path = input("Enter image path (or 'q' to quit): ").strip()
+    # ============================================
+    # Create the main window
+    # ============================================
+    root = tk.Tk()
+    root.title("MNIST Digit Prediction - Draw or Upload")
+    root.configure(bg='#2b2b2b')
+    root.resizable(False, False)
 
-        # Check for quit command
-        if image_path.lower() in ['q', 'quit', 'exit']:
-            print()
-            print("Exiting prediction mode. Thank you!")
-            break
+    # Canvas size: 280x280 (10x MNIST resolution for easier drawing)
+    CANVAS_SIZE = 280
+    PEN_WIDTH = 18  # Thick pen for drawing digits
 
-        # Skip empty input
-        if not image_path:
-            continue
+    # ============================================
+    # Title label
+    # ============================================
+    title_label = tk.Label(
+        root,
+        text="Draw a digit (0-9) or Load an image",
+        font=('Arial', 14, 'bold'),
+        fg='white', bg='#2b2b2b',
+        pady=10
+    )
+    title_label.pack()
 
-        print()
-        print("Processing image...")
-        print("-" * 60)
+    # ============================================
+    # Drawing canvas (black background)
+    # ============================================
+    canvas = tk.Canvas(
+        root,
+        width=CANVAS_SIZE,
+        height=CANVAS_SIZE,
+        bg='black',
+        cursor='crosshair',
+        highlightthickness=2,
+        highlightbackground='#666'
+    )
+    canvas.pack(padx=20, pady=5)
 
-        # Make prediction
-        digit, confidence, probabilities = predict_digit(model, image_path)
+    # ============================================
+    # Status label (shows prediction result)
+    # ============================================
+    status_label = tk.Label(
+        root,
+        text="Draw a digit and click 'Predict'",
+        font=('Arial', 12),
+        fg='#aaaaaa', bg='#2b2b2b',
+        pady=5
+    )
+    status_label.pack()
 
-        # Display results
-        if digit is not None:
-            display_prediction(image_path, digit, confidence, probabilities)
-        else:
-            print("Failed to process image. Please check the path and format.")
-            print()
+    # ============================================
+    # Drawing state
+    # ============================================
+    drawing_state = {'last_x': None, 'last_y': None}
+
+    def start_draw(event):
+        drawing_state['last_x'] = event.x
+        drawing_state['last_y'] = event.y
+
+    def draw(event):
+        if drawing_state['last_x'] is not None:
+            canvas.create_line(
+                drawing_state['last_x'], drawing_state['last_y'],
+                event.x, event.y,
+                fill='white',
+                width=PEN_WIDTH,
+                capstyle=tk.ROUND,
+                joinstyle=tk.ROUND
+            )
+        drawing_state['last_x'] = event.x
+        drawing_state['last_y'] = event.y
+
+    def stop_draw(event):
+        drawing_state['last_x'] = None
+        drawing_state['last_y'] = None
+
+    canvas.bind('<Button-1>', start_draw)
+    canvas.bind('<B1-Motion>', draw)
+    canvas.bind('<ButtonRelease-1>', stop_draw)
+
+    # ============================================
+    # Get image from canvas as numpy array
+    # ============================================
+    def get_canvas_image():
+        """Capture the canvas content as a 28x28 numpy array."""
+        # Save canvas to a temporary PostScript file, then convert
+        import tempfile
+
+        # Method: Save canvas as .ps, convert to image via PIL
+        tmp_ps = os.path.join(tempfile.gettempdir(), '_mnist_canvas.ps')
+        tmp_png = os.path.join(tempfile.gettempdir(), '_mnist_canvas.png')
+
+        try:
+            canvas.postscript(file=tmp_ps, colormode='gray')
+            # Convert PostScript to PNG using PIL
+            img = Image.open(tmp_ps)
+            img = img.convert('L')
+            img = img.resize((28, 28), Image.Resampling.LANCZOS)
+            img_array = np.array(img)
+
+            # Clean up temp files
+            if os.path.exists(tmp_ps):
+                os.remove(tmp_ps)
+
+            return img_array
+
+        except Exception:
+            # Fallback: manually read canvas pixel data using winfo
+            # Create a blank image and draw the lines manually
+            img = Image.new('L', (CANVAS_SIZE, CANVAS_SIZE), 0)
+            from PIL import ImageDraw
+            draw_ctx = ImageDraw.Draw(img)
+
+            # Read all line items from canvas
+            for item in canvas.find_all():
+                coords = canvas.coords(item)
+                if len(coords) == 4:
+                    draw_ctx.line(coords, fill=255, width=PEN_WIDTH)
+
+            img = img.resize((28, 28), Image.Resampling.LANCZOS)
+            img_array = np.array(img)
+
+            # Clean up temp files
+            if os.path.exists(tmp_ps):
+                os.remove(tmp_ps)
+
+            return img_array
+
+    # ============================================
+    # Button actions
+    # ============================================
+    def on_predict():
+        """Get canvas image and run prediction."""
+        img_array = get_canvas_image()
+        status_label.config(text="Predicting...", fg='yellow')
+        root.update()
+
+        predicted, confidence = predict_from_array(img_array)
+        status_label.config(
+            text=f"Prediction: {predicted}  (Confidence: {confidence:.1f}%)",
+            fg='#00ff00',
+            font=('Arial', 14, 'bold')
+        )
+
+    def on_clear():
+        """Clear the canvas."""
+        canvas.delete('all')
+        status_label.config(
+            text="Draw a digit and click 'Predict'",
+            fg='#aaaaaa',
+            font=('Arial', 12)
+        )
+
+    def on_load_image():
+        """Open file browser, load image, display on canvas, predict."""
+        file_path = filedialog.askopenfilename(
+            title="Select a handwritten digit image",
+            filetypes=[
+                ("Image files", "*.png *.jpg *.jpeg *.bmp *.gif *.tiff"),
+                ("All files", "*.*")
+            ]
+        )
+
+        if not file_path:
+            return  # User cancelled
+
+        try:
+            # Load and preprocess
+            img = Image.open(file_path).convert('L')
+            img_resized = img.resize((28, 28), Image.Resampling.LANCZOS)
+            img_array = np.array(img_resized)
+
+            # Auto-invert: if background is bright (white paper), invert colors
+            # MNIST expects white digit on black background
+            if img_array.mean() > 127:
+                print("  (Auto-inverted colors: black-on-white -> white-on-black)")
+                img_array = 255 - img_array
+
+            # Display loaded image on canvas
+            canvas.delete('all')
+            # Scale up to canvas size for display
+            img_display = Image.fromarray(img_array).resize(
+                (CANVAS_SIZE, CANVAS_SIZE), Image.Resampling.NEAREST
+            )
+            # Convert to PhotoImage for Tkinter
+            from PIL import ImageTk
+            photo = ImageTk.PhotoImage(img_display)
+            canvas.image = photo  # Keep reference to prevent garbage collection
+            canvas.create_image(0, 0, anchor='nw', image=photo)
+
+            status_label.config(text="Image loaded! Predicting...", fg='yellow')
+            root.update()
+
+            # Predict
+            predicted, confidence = predict_from_array(img_array)
+            status_label.config(
+                text=f"Prediction: {predicted}  (Confidence: {confidence:.1f}%)",
+                fg='#00ff00',
+                font=('Arial', 14, 'bold')
+            )
+
+        except Exception as e:
+            status_label.config(text=f"Error: {e}", fg='red')
+
+    # ============================================
+    # Buttons frame
+    # ============================================
+    btn_frame = tk.Frame(root, bg='#2b2b2b', pady=10)
+    btn_frame.pack()
+
+    predict_btn = tk.Button(
+        btn_frame, text="Predict",
+        command=on_predict,
+        font=('Arial', 12, 'bold'),
+        bg='#4CAF50', fg='white',
+        activebackground='#45a049',
+        width=10, height=1,
+        cursor='hand2'
+    )
+    predict_btn.pack(side=tk.LEFT, padx=5)
+
+    clear_btn = tk.Button(
+        btn_frame, text="Clear",
+        command=on_clear,
+        font=('Arial', 12, 'bold'),
+        bg='#f44336', fg='white',
+        activebackground='#da190b',
+        width=10, height=1,
+        cursor='hand2'
+    )
+    clear_btn.pack(side=tk.LEFT, padx=5)
+
+    load_btn = tk.Button(
+        btn_frame, text="Load Image",
+        command=on_load_image,
+        font=('Arial', 12, 'bold'),
+        bg='#2196F3', fg='white',
+        activebackground='#0b7dda',
+        width=10, height=1,
+        cursor='hand2'
+    )
+    load_btn.pack(side=tk.LEFT, padx=5)
+
+    # ============================================
+    # Instructions label at bottom
+    # ============================================
+    info_label = tk.Label(
+        root,
+        text="Tip: Draw a large, centered digit for best results",
+        font=('Arial', 10),
+        fg='#777', bg='#2b2b2b',
+        pady=5
+    )
+    info_label.pack()
+
+    # ============================================
+    # Center window on screen
+    # ============================================
+    root.update_idletasks()
+    x = (root.winfo_screenwidth() // 2) - (root.winfo_reqwidth() // 2)
+    y = (root.winfo_screenheight() // 2) - (root.winfo_reqheight() // 2)
+    root.geometry(f"+{x}+{y}")
+
+    # Start the GUI event loop
+    root.mainloop()
+
+    print()
+    print("GUI window closed.")
+    print("=" * 60)
+    print()
 
 
-# Example usage (commented out - uncomment to use)
-# Uncomment the line below to enter interactive prediction mode:
-# interactive_prediction_mode()
-
-print("To use interactive prediction mode, uncomment the line:")
-print("  interactive_prediction_mode()")
-print()
-print("Or predict a single image:")
-print("  digit, conf, probs = predict_digit(model, 'path/to/image.png')")
-print("  display_prediction('path/to/image.png', digit, conf, probs)")
-print()
+# ============================================
+# Launch the GUI automatically
+# ============================================
+print("INTERACTIVE TESTING")
 print("=" * 60)
 print()
+print("Opening drawing/upload GUI window...")
+print()
+open_drawing_gui()
 
 
 # ============================================
